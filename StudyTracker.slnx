@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="StudyTracker.Api/StudyTracker.Api.csproj" />
+  <Project Path="StudyTracker.Console/StudyTracker.Console.csproj" />
+  <Project Path="StudyTracker.Core/StudyTracker.Core.csproj" />
+</Solution>
