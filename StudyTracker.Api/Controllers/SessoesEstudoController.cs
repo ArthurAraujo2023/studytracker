@@ -82,7 +82,13 @@ public class SessoesEstudoController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("buscar")]
+    public ActionResult<List<SessaoEstudo>> BuscarSessoesPorMateria([FromQuery] string materia)
+    {
+        var listaDeMateria = sessaoEstudoService.BuscarSessoesPorMateria(materia);
 
+        return Ok(listaDeMateria);
+    }
 
 
 }

@@ -123,4 +123,26 @@ public class SessaoEstudoService
         return true;
     }
 
+    public List<SessaoEstudo> BuscarSessoesPorMateria(string materia)
+    {
+        List<SessaoEstudo> resultado = new List<SessaoEstudo>();
+
+        if (string.IsNullOrWhiteSpace(materia))
+        {
+            return resultado;
+        }
+
+        materia = materia.Trim();
+
+        foreach (var sessao in listaDeSessoes)
+        {
+            if (string.Equals(sessao.Materia, materia, StringComparison.OrdinalIgnoreCase))
+            {
+                resultado.Add(sessao);
+            }
+        }
+
+        return resultado;
+    }
+
 }
