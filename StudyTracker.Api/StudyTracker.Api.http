@@ -1,6 +1,44 @@
-@StudyTracker.Api_HostAddress = http://localhost:5239
+@baseUrl = http://localhost:5239
 
-GET {{StudyTracker.Api_HostAddress}}/weatherforecast/
+### Listar todas as sessões
+GET {{baseUrl}}/api/sessoes-estudo
 Accept: application/json
 
-###
+
+### Criar uma nova sessão
+POST {{baseUrl}}/api/sessoes-estudo
+Content-Type: application/json
+
+{
+  "materia": "C#",
+  "topico": "Testando API com arquivo HTTP",
+  "minutosEstudados": 60,
+  "dificuldade": 4
+}
+
+
+### Buscar sessão por Id
+GET {{baseUrl}}/api/sessoes-estudo/1
+Accept: application/json
+
+
+### Atualizar sessão por Id
+PUT {{baseUrl}}/api/sessoes-estudo/1
+Content-Type: application/json
+
+{
+  "materia": "ASP.NET Core",
+  "topico": "PUT e atualização de dados",
+  "minutosEstudados": 90,
+  "dificuldade": 5
+}
+
+
+### Remover sessão por Id
+DELETE {{baseUrl}}/api/sessoes-estudo/1
+Accept: application/json
+
+
+### Buscar sessão removida para testar NotFound
+GET {{baseUrl}}/api/sessoes-estudo/1
+Accept: application/json

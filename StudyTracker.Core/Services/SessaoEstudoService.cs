@@ -17,33 +17,29 @@ public class SessaoEstudoService
         return listaDeSessoes;
     }
 
-    public bool CriarSessao(CriarSessaoEstudoDTO dto)
+    public SessaoEstudo? CriarSessao(CriarSessaoEstudoDTO dto)
     {
         dto.Materia = dto.Materia.Trim();
         dto.Topico = dto.Topico.Trim();
 
         if (string.IsNullOrWhiteSpace(dto.Materia))
         {
-
-            return false;
+            return null;
         }
 
         if (string.IsNullOrWhiteSpace(dto.Topico))
         {
-
-            return false;
+            return null;
         }
 
         if (dto.MinutosEstudados <= 0)
         {
-
-            return false;
+            return null;
         }
 
         if (dto.Dificuldade < 1 || dto.Dificuldade > 5)
         {
-
-            return false;
+            return null;
         }
 
         SessaoEstudo sessaoEstudo = new SessaoEstudo()
@@ -55,12 +51,12 @@ public class SessaoEstudoService
             Dificuldade = dto.Dificuldade,
             DataSessao = DateTime.Now,
             Concluido = true
-
         };
 
         listaDeSessoes.Add(sessaoEstudo);
         nextId++;
-        return true;
+
+        return sessaoEstudo;
     }
 
     public SessaoEstudo? BuscarSessaoPorId(int id)

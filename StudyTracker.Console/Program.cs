@@ -131,9 +131,9 @@ void CadastrarSessao(SessaoEstudoService service)
 
     criarSessaoEstudoDTO.Dificuldade = dificuldadeConvertida;
 
-    bool sessaoCriada = service.CriarSessao(criarSessaoEstudoDTO);
+    var sessaoCriada = service.CriarSessao(criarSessaoEstudoDTO);
 
-    if (sessaoCriada == false)
+    if (sessaoCriada == null)
     {
         Console.WriteLine("Falha no cadastro. Verifique os dados informados.");
     }

@@ -25,17 +25,22 @@ public class SessoesEstudoController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult CriarSessao([FromBody] CriarSessaoEstudoDTO dto)
+    public ActionResult<SessaoEstudo> CriarSessao([FromBody] CriarSessaoEstudoDTO dto)
     {
-        bool sessaoCriada = sessaoEstudoService.CriarSessao(dto);
+        var sessaoCriada = sessaoEstudoService.CriarSessao(dto);
 
-        if (sessaoCriada == false)
+        if (sessaoCriada == null)
         {
-            return BadRequest("Dados inválidos. Verifique matéria, tópico, minutos e dificuldade.");
+            return BadRequest("Dados inválidos.");
         }
 
-        return Ok("Sessão criada com sucesso.");
+        return CreatedAtAction(
+            nameof(BuscarSessaoPorId),
+            new { id = sessaoCriada.Id },
+            sessaoCriada
+        );
     }
+
 
     [HttpGet("{id}")]
     public ActionResult<SessaoEstudo> BuscarSessaoPorId([FromRoute] int id)
@@ -74,7 +79,7 @@ public class SessoesEstudoController : ControllerBase
             return NotFound();
         }
 
-        return Ok();
+        return NoContent();
     }
 
 
