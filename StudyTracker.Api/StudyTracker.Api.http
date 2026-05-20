@@ -5,40 +5,57 @@ GET {{baseUrl}}/api/sessoes-estudo
 Accept: application/json
 
 
-### Criar uma nova sessão
+### Criar sessão 1 - C#
 POST {{baseUrl}}/api/sessoes-estudo
 Content-Type: application/json
 
 {
   "materia": "C#",
-  "topico": "Testando API com arquivo HTTP",
+  "topico": "FromQuery e filtros",
   "minutosEstudados": 60,
   "dificuldade": 4
 }
 
 
-### Buscar sessão por Id
-GET {{baseUrl}}/api/sessoes-estudo/1
-Accept: application/json
-
-
-### Atualizar sessão por Id
-PUT {{baseUrl}}/api/sessoes-estudo/1
+### Criar sessão 2 - C#
+POST {{baseUrl}}/api/sessoes-estudo
 Content-Type: application/json
 
 {
-  "materia": "ASP.NET Core",
-  "topico": "PUT e atualização de dados",
-  "minutosEstudados": 90,
-  "dificuldade": 5
+  "materia": "C#",
+  "topico": "ActionResult e respostas HTTP",
+  "minutosEstudados": 45,
+  "dificuldade": 3
 }
 
 
-### Remover sessão por Id
-DELETE {{baseUrl}}/api/sessoes-estudo/1
+### Criar sessão 3 - Salesforce
+POST {{baseUrl}}/api/sessoes-estudo
+Content-Type: application/json
+
+{
+  "materia": "Salesforce",
+  "topico": "Flows",
+  "minutosEstudados": 50,
+  "dificuldade": 4
+}
+
+
+### Buscar por matéria existente - C#
+GET {{baseUrl}}/api/sessoes-estudo/buscar?materia=C%23
 Accept: application/json
 
 
-### Buscar sessão removida para testar NotFound
-GET {{baseUrl}}/api/sessoes-estudo/1
+### Buscar por matéria existente usando minúscula
+GET {{baseUrl}}/api/sessoes-estudo/buscar?materia=c%23
+Accept: application/json
+
+
+### Buscar por matéria existente - Salesforce
+GET {{baseUrl}}/api/sessoes-estudo/buscar?materia=Salesforce
+Accept: application/json
+
+
+### Buscar por matéria inexistente
+GET {{baseUrl}}/api/sessoes-estudo/buscar?materia=AWS
 Accept: application/json

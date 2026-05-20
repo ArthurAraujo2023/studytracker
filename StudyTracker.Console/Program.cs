@@ -46,6 +46,10 @@ while (true)
     {
         AtualizarSessaoPorId(sessaoEstudoService);
     }
+    else if (opcaoConvertida == 7)
+    {
+        BuscarSessoesPorMateria(sessaoEstudoService);
+    }
     else if (opcaoConvertida == 0)
     {
         break;
@@ -68,6 +72,7 @@ void MostrarMenu()
     Console.WriteLine("4 - Buscar sessão por Id");
     Console.WriteLine("5 - Remover sessão por Id");
     Console.WriteLine("6 - Atualizar sessão por Id");
+    Console.WriteLine("7 - Buscar sessões por matéria");
     Console.WriteLine("0 - Sair");
 }
 
@@ -140,6 +145,7 @@ void CadastrarSessao(SessaoEstudoService service)
     else
     {
         Console.WriteLine("Cadastro concluído com sucesso.");
+        Console.WriteLine($"Id criado: {sessaoCriada.Id}");
     }
 
     PausarTela();
@@ -160,8 +166,6 @@ void ListarSessoes(SessaoEstudoService service)
             MostrarSessao(sessao);
         }
     }
-
-
 
     PausarTela();
 }
@@ -217,15 +221,15 @@ void RemoverSessaoPorId(SessaoEstudoService service)
         return;
     }
 
-    bool removido = service.RemoverSessaoPorId(numeroConvertido);
+    var resultado = service.RemoverSessaoPorId(numeroConvertido);
 
-    if (removido == false)
+    if (resultado.NaoEncontrado)
     {
-        Console.WriteLine("Sessão não encontrada.");
+        Console.WriteLine(resultado.Mensagem);
     }
-    else
+    else if (resultado.Sucesso)
     {
-        Console.WriteLine("Sessão removida com sucesso.");
+        Console.WriteLine(resultado.Mensagem);
     }
 
     PausarTela();
@@ -284,15 +288,41 @@ void AtualizarSessaoPorId(SessaoEstudoService service)
 
     atualizarSessaoEstudoDTO.Dificuldade = dificuldadeConvertida;
 
-    bool sessaoAtualizada = service.AtualizarSessaoPorId(numero, atualizarSessaoEstudoDTO);
+    var resultado = service.AtualizarSessaoPorId(numero, atualizarSessaoEstudoDTO);
 
-    if (sessaoAtualizada == false)
+    if (resultado.NaoEncontrado)
     {
-        Console.WriteLine("Falha ao atualizar. Verifique o Id ou os dados informados.");
+        Console.WriteLine(resultado.Mensagem);
+    }
+    else if (resultado.ErroValidacao)
+    {
+        Console.WriteLine(resultado.Mensagem);
+    }
+    else if (resultado.Sucesso)
+    {
+        Console.WriteLine(resultado.Mensagem);
+    }
+
+    PausarTela();
+}
+
+void BuscarSessoesPorMateria(SessaoEstudoService service)
+{
+    Console.Write("Insira a matéria para buscar: ");
+    string materia = Console.ReadLine() ?? "";
+
+    var sessoes = service.BuscarSessoesPorMateria(materia);
+
+    if (sessoes.Count == 0)
+    {
+        Console.WriteLine("Nenhuma sessão encontrada para essa matéria.");
     }
     else
     {
-        Console.WriteLine("Sessão atualizada com sucesso.");
+        foreach (var sessao in sessoes)
+        {
+            MostrarSessao(sessao);
+        }
     }
 
     PausarTela();

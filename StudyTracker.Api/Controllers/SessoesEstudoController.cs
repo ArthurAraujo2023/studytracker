@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using StudyTracker.Core.Services;
-using StudyTracker.Core.Models;
 using StudyTracker.Core.DTOs;
+using StudyTracker.Core.Models;
+using StudyTracker.Core.Services;
 
 namespace StudyTracker.Api.Controllers;
 
@@ -24,6 +24,27 @@ public class SessoesEstudoController : ControllerBase
         return Ok(sessoes);
     }
 
+    [HttpGet("buscar")]
+    public ActionResult<List<SessaoEstudo>> BuscarSessoesPorMateria([FromQuery] string materia)
+    {
+        var sessoes = sessaoEstudoService.BuscarSessoesPorMateria(materia);
+
+        return Ok(sessoes);
+    }
+
+    [HttpGet("{id:int}")]
+    public ActionResult<SessaoEstudo> BuscarSessaoPorId([FromRoute] int id)
+    {
+        var sessao = sessaoEstudoService.BuscarSessaoPorId(id);
+
+        if (sessao == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(sessao);
+    }
+
     [HttpPost]
     public ActionResult<SessaoEstudo> CriarSessao([FromBody] CriarSessaoEstudoDTO dto)
     {
@@ -41,54 +62,34 @@ public class SessoesEstudoController : ControllerBase
         );
     }
 
-
-    [HttpGet("{id}")]
-    public ActionResult<SessaoEstudo> BuscarSessaoPorId([FromRoute] int id)
-    {
-        var sessao = sessaoEstudoService.BuscarSessaoPorId(id);
-
-        if (sessao == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(sessao);
-    }
-
-    [HttpDelete("{id}")]
-    public ActionResult RemoverSessaoPorId([FromRoute] int id)
-    {
-        bool removido = sessaoEstudoService.RemoverSessaoPorId(id);
-
-        if (removido == false)
-        {
-            return NotFound();
-        }
-
-        return NoContent();
-    }
-
-    [HttpPut("{id}")]
-
+    [HttpPut("{id:int}")]
     public ActionResult AtualizarSessaoPorId([FromRoute] int id, [FromBody] AtualizarSessaoEstudoDTO dto)
     {
-        var atualizar = sessaoEstudoService.AtualizarSessaoPorId(id, dto);
+        var resultado = sessaoEstudoService.AtualizarSessaoPorId(id, dto);
 
-        if (atualizar == false)
+        if (resultado.NaoEncontrado)
         {
-            return NotFound();
+            return NotFound(resultado.Mensagem);
+        }
+
+        if (resultado.ErroValidacao)
+        {
+            return BadRequest(resultado.Mensagem);
         }
 
         return NoContent();
     }
 
-    [HttpGet("buscar")]
-    public ActionResult<List<SessaoEstudo>> BuscarSessoesPorMateria([FromQuery] string materia)
+    [HttpDelete("{id:int}")]
+    public ActionResult RemoverSessaoPorId([FromRoute] int id)
     {
-        var listaDeMateria = sessaoEstudoService.BuscarSessoesPorMateria(materia);
+        var resultado = sessaoEstudoService.RemoverSessaoPorId(id);
 
-        return Ok(listaDeMateria);
+        if (resultado.NaoEncontrado)
+        {
+            return NotFound(resultado.Mensagem);
+        }
+
+        return NoContent();
     }
-
-
 }

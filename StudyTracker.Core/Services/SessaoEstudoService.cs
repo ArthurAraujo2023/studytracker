@@ -1,5 +1,6 @@
-using StudyTracker.Core.Models;
 using StudyTracker.Core.DTOs;
+using StudyTracker.Core.Models;
+using StudyTracker.Core.Results;
 
 namespace StudyTracker.Core.Services;
 
@@ -7,6 +8,7 @@ public class SessaoEstudoService
 {
     private readonly List<SessaoEstudo> listaDeSessoes = new List<SessaoEstudo>();
     private int nextId = 1;
+
     public int TotalDeSessoes
     {
         get { return listaDeSessoes.Count; }
@@ -14,20 +16,20 @@ public class SessaoEstudoService
 
     public List<SessaoEstudo> ListarSessoes()
     {
-        return listaDeSessoes;
+        return new List<SessaoEstudo>(listaDeSessoes);
     }
 
     public SessaoEstudo? CriarSessao(CriarSessaoEstudoDTO dto)
     {
-        dto.Materia = dto.Materia.Trim();
-        dto.Topico = dto.Topico.Trim();
+        string materia = dto.Materia.Trim();
+        string topico = dto.Topico.Trim();
 
-        if (string.IsNullOrWhiteSpace(dto.Materia))
+        if (string.IsNullOrWhiteSpace(materia))
         {
             return null;
         }
 
-        if (string.IsNullOrWhiteSpace(dto.Topico))
+        if (string.IsNullOrWhiteSpace(topico))
         {
             return null;
         }
@@ -45,8 +47,8 @@ public class SessaoEstudoService
         SessaoEstudo sessaoEstudo = new SessaoEstudo()
         {
             Id = nextId,
-            Materia = dto.Materia,
-            Topico = dto.Topico,
+            Materia = materia,
+            Topico = topico,
             MinutosEstudados = dto.MinutosEstudados,
             Dificuldade = dto.Dificuldade,
             DataSessao = DateTime.Now,
@@ -71,56 +73,59 @@ public class SessaoEstudoService
 
         return null;
     }
-    public bool RemoverSessaoPorId(int id)
+
+    public ResultadoOperacao RemoverSessaoPorId(int id)
     {
         var sessao = BuscarSessaoPorId(id);
 
         if (sessao == null)
         {
-            return false;
+            return ResultadoOperacao.FalhaNaoEncontrado("Sessão não encontrada.");
         }
 
         listaDeSessoes.Remove(sessao);
-        return true;
+
+        return ResultadoOperacao.SucessoOperacao("Sessão removida com sucesso.");
     }
-    public bool AtualizarSessaoPorId(int id, AtualizarSessaoEstudoDTO dto)
+
+    public ResultadoOperacao AtualizarSessaoPorId(int id, AtualizarSessaoEstudoDTO dto)
     {
         var sessao = BuscarSessaoPorId(id);
 
         if (sessao == null)
         {
-            return false;
+            return ResultadoOperacao.FalhaNaoEncontrado("Sessão não encontrada.");
         }
 
-        dto.Materia = dto.Materia.Trim();
-        dto.Topico = dto.Topico.Trim();
+        string materia = dto.Materia.Trim();
+        string topico = dto.Topico.Trim();
 
-        if (string.IsNullOrWhiteSpace(dto.Materia))
+        if (string.IsNullOrWhiteSpace(materia))
         {
-            return false;
+            return ResultadoOperacao.FalhaValidacao("Matéria é obrigatória.");
         }
 
-        if (string.IsNullOrWhiteSpace(dto.Topico))
+        if (string.IsNullOrWhiteSpace(topico))
         {
-            return false;
+            return ResultadoOperacao.FalhaValidacao("Tópico é obrigatório.");
         }
 
         if (dto.MinutosEstudados <= 0)
         {
-            return false;
+            return ResultadoOperacao.FalhaValidacao("Minutos estudados devem ser maiores que zero.");
         }
 
         if (dto.Dificuldade < 1 || dto.Dificuldade > 5)
         {
-            return false;
+            return ResultadoOperacao.FalhaValidacao("Dificuldade deve estar entre 1 e 5.");
         }
 
-        sessao.Materia = dto.Materia;
-        sessao.Topico = dto.Topico;
+        sessao.Materia = materia;
+        sessao.Topico = topico;
         sessao.MinutosEstudados = dto.MinutosEstudados;
         sessao.Dificuldade = dto.Dificuldade;
 
-        return true;
+        return ResultadoOperacao.SucessoOperacao("Sessão atualizada com sucesso.");
     }
 
     public List<SessaoEstudo> BuscarSessoesPorMateria(string materia)
@@ -132,11 +137,11 @@ public class SessaoEstudoService
             return resultado;
         }
 
-        materia = materia.Trim();
+        string materiaLimpa = materia.Trim();
 
         foreach (var sessao in listaDeSessoes)
         {
-            if (string.Equals(sessao.Materia, materia, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(sessao.Materia, materiaLimpa, StringComparison.OrdinalIgnoreCase))
             {
                 resultado.Add(sessao);
             }
@@ -144,5 +149,4 @@ public class SessaoEstudoService
 
         return resultado;
     }
-
 }
