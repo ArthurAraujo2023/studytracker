@@ -136,18 +136,17 @@ void CadastrarSessao(SessaoEstudoService service)
 
     criarSessaoEstudoDTO.Dificuldade = dificuldadeConvertida;
 
-    var sessaoCriada = service.CriarSessao(criarSessaoEstudoDTO);
+    var resultado = service.CriarSessao(criarSessaoEstudoDTO);
 
-    if (sessaoCriada == null)
+    if (resultado.ErroValidacao)
     {
-        Console.WriteLine("Falha no cadastro. Verifique os dados informados.");
+        Console.WriteLine(resultado.Mensagem);
     }
-    else
+    else if (resultado.Sucesso && resultado.Dado != null)
     {
-        Console.WriteLine("Cadastro concluído com sucesso.");
-        Console.WriteLine($"Id criado: {sessaoCriada.Id}");
+        Console.WriteLine(resultado.Mensagem);
+        Console.WriteLine($"Id criado: {resultado.Dado.Id}");
     }
-
     PausarTela();
 }
 

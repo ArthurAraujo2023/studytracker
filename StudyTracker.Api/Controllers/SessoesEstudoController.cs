@@ -48,20 +48,24 @@ public class SessoesEstudoController : ControllerBase
     [HttpPost]
     public ActionResult<SessaoEstudo> CriarSessao([FromBody] CriarSessaoEstudoDTO dto)
     {
-        var sessaoCriada = sessaoEstudoService.CriarSessao(dto);
+        var resultado = sessaoEstudoService.CriarSessao(dto);
 
-        if (sessaoCriada == null)
+        if (resultado.ErroValidacao)
         {
-            return BadRequest("Dados inválidos.");
+            return BadRequest(resultado.Mensagem);
+        }
+
+        if (resultado.Dado == null)
+        {
+            return BadRequest("Não foi possível criar a sessão.");
         }
 
         return CreatedAtAction(
             nameof(BuscarSessaoPorId),
-            new { id = sessaoCriada.Id },
-            sessaoCriada
+            new { id = resultado.Dado.Id },
+            resultado.Dado
         );
     }
-
     [HttpPut("{id:int}")]
     public ActionResult AtualizarSessaoPorId([FromRoute] int id, [FromBody] AtualizarSessaoEstudoDTO dto)
     {

@@ -19,29 +19,29 @@ public class SessaoEstudoService
         return new List<SessaoEstudo>(listaDeSessoes);
     }
 
-    public SessaoEstudo? CriarSessao(CriarSessaoEstudoDTO dto)
+    public ResultadoOperacaoGenerico<SessaoEstudo> CriarSessao(CriarSessaoEstudoDTO dto)
     {
         string materia = dto.Materia.Trim();
         string topico = dto.Topico.Trim();
 
         if (string.IsNullOrWhiteSpace(materia))
         {
-            return null;
+            return ResultadoOperacaoGenerico<SessaoEstudo>.FalhaValidacao("Matéria é obrigatória.");
         }
 
         if (string.IsNullOrWhiteSpace(topico))
         {
-            return null;
+            return ResultadoOperacaoGenerico<SessaoEstudo>.FalhaValidacao("Tópico é obrigatório.");
         }
 
         if (dto.MinutosEstudados <= 0)
         {
-            return null;
+            return ResultadoOperacaoGenerico<SessaoEstudo>.FalhaValidacao("Minutos estudados devem ser maiores que zero.");
         }
 
         if (dto.Dificuldade < 1 || dto.Dificuldade > 5)
         {
-            return null;
+            return ResultadoOperacaoGenerico<SessaoEstudo>.FalhaValidacao("Dificuldade deve estar entre 1 e 5.");
         }
 
         SessaoEstudo sessaoEstudo = new SessaoEstudo()
@@ -58,9 +58,11 @@ public class SessaoEstudoService
         listaDeSessoes.Add(sessaoEstudo);
         nextId++;
 
-        return sessaoEstudo;
+        return ResultadoOperacaoGenerico<SessaoEstudo>.SucessoComDado(
+            "Sessão criada com sucesso.",
+            sessaoEstudo
+        );
     }
-
     public SessaoEstudo? BuscarSessaoPorId(int id)
     {
         foreach (var sessao in listaDeSessoes)
