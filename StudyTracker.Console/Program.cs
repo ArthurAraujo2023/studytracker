@@ -1,9 +1,38 @@
 ﻿using System;
+using System.IO;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using StudyTracker.Core.DTOs;
+using StudyTracker.Core.Interfaces;
 using StudyTracker.Core.Models;
 using StudyTracker.Core.Services;
+using StudyTracker.Infrastructure.Data;
+using StudyTracker.Infrastructure.Repositories;
 
-SessaoEstudoService sessaoEstudoService = new SessaoEstudoService();
+string databasePath = Path.GetFullPath(
+    Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "database", "studytracker.db")
+);
+
+Directory.CreateDirectory(Path.GetDirectoryName(databasePath)!);
+
+ServiceCollection services = new ServiceCollection();
+
+services.AddDbContext<StudyTrackerDbContext>(options =>
+    options.UseSqlite($"Data Source={databasePath}"));
+
+services.AddScoped<ISessaoEstudoRepository, SessaoEstudoRepository>();
+services.AddScoped<SessaoEstudoRepository>();
+services.AddScoped<SessaoEstudoService>();
+
+using ServiceProvider serviceProvider = services.BuildServiceProvider();
+using IServiceScope scope = serviceProvider.CreateScope();
+
+SessaoEstudoService sessaoEstudoService =
+    scope.ServiceProvider.GetRequiredService<SessaoEstudoService>();
+
+Console.WriteLine("StudyTracker Console iniciado.");
+Console.WriteLine($"Banco usado: {databasePath}");
+Console.WriteLine();
 
 while (true)
 {
@@ -12,8 +41,7 @@ while (true)
     Console.Write("Opção: ");
     string textoOpcao = Console.ReadLine() ?? "";
 
-    int opcaoConvertida;
-    bool conversaoOpcao = int.TryParse(textoOpcao, out opcaoConvertida);
+    bool conversaoOpcao = int.TryParse(textoOpcao, out int opcaoConvertida);
 
     if (conversaoOpcao == false)
     {
@@ -52,6 +80,7 @@ while (true)
     }
     else if (opcaoConvertida == 0)
     {
+        Console.WriteLine("Encerrando o Console...");
         break;
     }
     else
@@ -81,6 +110,7 @@ void PausarTela()
     Console.WriteLine();
     Console.Write("Pressione Enter para voltar ao menu...");
     Console.ReadLine();
+    Console.Clear();
 }
 
 void MostrarSessao(SessaoEstudo sessao)
@@ -109,8 +139,7 @@ void CadastrarSessao(SessaoEstudoService service)
     Console.Write("Insira os Minutos estudados: ");
     string textoMinutos = Console.ReadLine() ?? "";
 
-    int minutosConvertidos;
-    bool minutosValido = int.TryParse(textoMinutos, out minutosConvertidos);
+    bool minutosValido = int.TryParse(textoMinutos, out int minutosConvertidos);
 
     if (minutosValido == false)
     {
@@ -124,8 +153,7 @@ void CadastrarSessao(SessaoEstudoService service)
     Console.Write("Insira a Dificuldade: ");
     string textoDificuldade = Console.ReadLine() ?? "";
 
-    int dificuldadeConvertida;
-    bool dificuldadeValida = int.TryParse(textoDificuldade, out dificuldadeConvertida);
+    bool dificuldadeValida = int.TryParse(textoDificuldade, out int dificuldadeConvertida);
 
     if (dificuldadeValida == false)
     {
@@ -147,6 +175,11 @@ void CadastrarSessao(SessaoEstudoService service)
         Console.WriteLine(resultado.Mensagem);
         Console.WriteLine($"Id criado: {resultado.Dado.Id}");
     }
+    else
+    {
+        Console.WriteLine("Não foi possível criar a sessão.");
+    }
+
     PausarTela();
 }
 
@@ -171,7 +204,9 @@ void ListarSessoes(SessaoEstudoService service)
 
 void MostrarTotalDeSessoes(SessaoEstudoService service)
 {
-    Console.WriteLine($"Total de sessões: {service.TotalDeSessoes}");
+    var sessoes = service.ListarSessoes();
+
+    Console.WriteLine($"Total de sessões: {sessoes.Count}");
 
     PausarTela();
 }
@@ -181,8 +216,7 @@ void BuscarSessaoPorId(SessaoEstudoService service)
     Console.Write("Insira o Id: ");
     string textoAConverter = Console.ReadLine() ?? "";
 
-    int valorConvertido;
-    bool valorAConverter = int.TryParse(textoAConverter, out valorConvertido);
+    bool valorAConverter = int.TryParse(textoAConverter, out int valorConvertido);
 
     if (valorAConverter == false)
     {
@@ -210,8 +244,7 @@ void RemoverSessaoPorId(SessaoEstudoService service)
     Console.Write("Insira o Id para remover: ");
     string textoAConverter = Console.ReadLine() ?? "";
 
-    int numeroConvertido;
-    bool textoConvertendo = int.TryParse(textoAConverter, out numeroConvertido);
+    bool textoConvertendo = int.TryParse(textoAConverter, out int numeroConvertido);
 
     if (textoConvertendo == false)
     {
@@ -230,6 +263,10 @@ void RemoverSessaoPorId(SessaoEstudoService service)
     {
         Console.WriteLine(resultado.Mensagem);
     }
+    else
+    {
+        Console.WriteLine("Não foi possível remover a sessão.");
+    }
 
     PausarTela();
 }
@@ -241,8 +278,7 @@ void AtualizarSessaoPorId(SessaoEstudoService service)
     Console.Write("Me envie o Id da sessão que será atualizada: ");
     string textoAConverter = Console.ReadLine() ?? "";
 
-    int numero;
-    bool textoConvertendo = int.TryParse(textoAConverter, out numero);
+    bool textoConvertendo = int.TryParse(textoAConverter, out int numero);
 
     if (textoConvertendo == false)
     {
@@ -260,8 +296,7 @@ void AtualizarSessaoPorId(SessaoEstudoService service)
     Console.Write("Insira os novos Minutos estudados: ");
     string textoMinutos = Console.ReadLine() ?? "";
 
-    int minutosConvertidos;
-    bool minutosValido = int.TryParse(textoMinutos, out minutosConvertidos);
+    bool minutosValido = int.TryParse(textoMinutos, out int minutosConvertidos);
 
     if (minutosValido == false)
     {
@@ -275,8 +310,7 @@ void AtualizarSessaoPorId(SessaoEstudoService service)
     Console.Write("Insira a nova Dificuldade: ");
     string textoDificuldade = Console.ReadLine() ?? "";
 
-    int dificuldadeConvertida;
-    bool dificuldadeValida = int.TryParse(textoDificuldade, out dificuldadeConvertida);
+    bool dificuldadeValida = int.TryParse(textoDificuldade, out int dificuldadeConvertida);
 
     if (dificuldadeValida == false)
     {
@@ -300,6 +334,10 @@ void AtualizarSessaoPorId(SessaoEstudoService service)
     else if (resultado.Sucesso)
     {
         Console.WriteLine(resultado.Mensagem);
+    }
+    else
+    {
+        Console.WriteLine("Não foi possível atualizar a sessão.");
     }
 
     PausarTela();

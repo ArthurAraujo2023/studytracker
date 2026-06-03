@@ -1,4 +1,5 @@
 using StudyTracker.Core.DTOs;
+using StudyTracker.Core.Interfaces;
 using StudyTracker.Core.Models;
 using StudyTracker.Core.Results;
 
@@ -6,17 +7,21 @@ namespace StudyTracker.Core.Services;
 
 public class SessaoEstudoService
 {
-    private readonly List<SessaoEstudo> listaDeSessoes = new List<SessaoEstudo>();
-    private int nextId = 1;
+    private readonly ISessaoEstudoRepository _repository;
+
+    public SessaoEstudoService(ISessaoEstudoRepository repository)
+    {
+        _repository = repository;
+    }
 
     public int TotalDeSessoes
     {
-        get { return listaDeSessoes.Count; }
+        get { return _repository.ListarTodas().Count; }
     }
 
     public List<SessaoEstudo> ListarSessoes()
     {
-        return new List<SessaoEstudo>(listaDeSessoes);
+        return _repository.ListarTodas();
     }
 
     public ResultadoOperacaoGenerico<SessaoEstudo> CriarSessao(CriarSessaoEstudoDTO dto)
@@ -46,7 +51,6 @@ public class SessaoEstudoService
 
         SessaoEstudo sessaoEstudo = new SessaoEstudo()
         {
-            Id = nextId,
             Materia = materia,
             Topico = topico,
             MinutosEstudados = dto.MinutosEstudados,
@@ -55,25 +59,17 @@ public class SessaoEstudoService
             Concluido = true
         };
 
-        listaDeSessoes.Add(sessaoEstudo);
-        nextId++;
+        _repository.Adicionar(sessaoEstudo);
 
         return ResultadoOperacaoGenerico<SessaoEstudo>.SucessoComDado(
             "Sessão criada com sucesso.",
             sessaoEstudo
         );
     }
+
     public SessaoEstudo? BuscarSessaoPorId(int id)
     {
-        foreach (var sessao in listaDeSessoes)
-        {
-            if (sessao.Id == id)
-            {
-                return sessao;
-            }
-        }
-
-        return null;
+        return _repository.BuscarPorId(id);
     }
 
     public ResultadoOperacao RemoverSessaoPorId(int id)
@@ -85,7 +81,7 @@ public class SessaoEstudoService
             return ResultadoOperacao.FalhaNaoEncontrado("Sessão não encontrada.");
         }
 
-        listaDeSessoes.Remove(sessao);
+        _repository.Remover(sessao);
 
         return ResultadoOperacao.SucessoOperacao("Sessão removida com sucesso.");
     }
@@ -127,28 +123,20 @@ public class SessaoEstudoService
         sessao.MinutosEstudados = dto.MinutosEstudados;
         sessao.Dificuldade = dto.Dificuldade;
 
+        _repository.Atualizar(sessao);
+
         return ResultadoOperacao.SucessoOperacao("Sessão atualizada com sucesso.");
     }
 
     public List<SessaoEstudo> BuscarSessoesPorMateria(string materia)
     {
-        List<SessaoEstudo> resultado = new List<SessaoEstudo>();
-
         if (string.IsNullOrWhiteSpace(materia))
         {
-            return resultado;
+            return new List<SessaoEstudo>();
         }
 
         string materiaLimpa = materia.Trim();
 
-        foreach (var sessao in listaDeSessoes)
-        {
-            if (string.Equals(sessao.Materia, materiaLimpa, StringComparison.OrdinalIgnoreCase))
-            {
-                resultado.Add(sessao);
-            }
-        }
-
-        return resultado;
+        return _repository.BuscarPorMateria(materiaLimpa);
     }
 }
